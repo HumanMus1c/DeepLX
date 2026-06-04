@@ -108,7 +108,13 @@ func Router(cfg *Config) *gin.Engine {
 	// Free API endpoint, No Pro Account required
 	r.POST("/translate", authMiddleware(cfg), func(c *gin.Context) {
 		req := PayloadFree{}
-		c.BindJSON(&req)
+		if err := c.BindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Invalid request payload",
+			})
+			return
+		}
 
 		sourceLang := req.SourceLang
 		targetLang := req.TargetLang
@@ -127,9 +133,10 @@ func Router(cfg *Config) *gin.Engine {
 
 		result, err := translate.TranslateByDeepLX(sourceLang, targetLang, translateText, tagHandling, proxyURL, "")
 		if err != nil {
+			log.Printf("Translation failed: %s", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
-				"message": "Translation failed: " + err.Error(),
+				"message": "Translation failed",
 			})
 			return
 		}
@@ -156,7 +163,13 @@ func Router(cfg *Config) *gin.Engine {
 	// Pro API endpoint, Pro Account required
 	r.POST("/v1/translate", authMiddleware(cfg), func(c *gin.Context) {
 		req := PayloadFree{}
-		c.BindJSON(&req)
+		if err := c.BindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Invalid request payload",
+			})
+			return
+		}
 
 		sourceLang := req.SourceLang
 		targetLang := req.TargetLang
@@ -195,9 +208,10 @@ func Router(cfg *Config) *gin.Engine {
 
 		result, err := translate.TranslateByDeepLX(sourceLang, targetLang, translateText, tagHandling, proxyURL, dlSession)
 		if err != nil {
+			log.Printf("Translation failed: %s", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
-				"message": "Translation failed: " + err.Error(),
+				"message": "Translation failed",
 			})
 			return
 		}
@@ -251,9 +265,10 @@ func Router(cfg *Config) *gin.Engine {
 
 		result, err := translate.TranslateByDeepLX("", targetLang, translateText, "", proxyURL, "")
 		if err != nil {
+			log.Printf("Translation failed: %s", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
-				"message": "Translation failed: " + err.Error(),
+				"message": "Translation failed",
 			})
 			return
 		}
