@@ -33,3 +33,8 @@ jobs:
       - name: Push changes to fork
         run: |
           git push origin main
+
+      # 5. Committer identity 设置推送身份
+      - name: Merge upstream (keep fork history)
+        run: git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" merge upstream/main --no-ff -m "chore: merge upstream/main"
+
